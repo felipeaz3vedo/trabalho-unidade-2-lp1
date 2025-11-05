@@ -10,7 +10,9 @@ protected:
     string nome, id, cargo;
 public:
     Funcionario(string n, string i, string c) : nome(n), id(i), cargo(c) {}
-    virtual void info() { cout << nome << " (" << cargo << ")" << endl; }
+    virtual void info() {
+        cout << nome << " (" << cargo << " - " << id  << ")" << endl;
+    }
 };
 
 // Classes derivadas
@@ -40,7 +42,9 @@ public:
     int numero; 
     bool disponivel;
     Mesa(int n) : numero(n), disponivel(true) {}
-    void info() { cout << "Mesa " << numero << " - " << (disponivel ? "Livre" : "Ocupada") << endl; }
+    void info() {
+        cout << "Mesa " << numero << " - " << (disponivel ? "Livre" : "Ocupada") << endl;
+    }
 };
 
 class Prato {
@@ -48,7 +52,9 @@ public:
     string nome;
     double preco;
     Prato(string n, double p) : nome(n), preco(p) {}
-    void info() { cout << nome << " - R$ " << preco << endl; }
+    void info() {
+        cout << nome << " - R$ " << preco << endl;
+    }
 };
 
 class Pedido {
@@ -69,10 +75,12 @@ public:
     int mesa;
     string data;
     Reserva(string c, int m, string d) : cliente(c), mesa(m), data(d) {}
-    void info() { cout << cliente << " - Mesa " << mesa << " - " << data << endl; }
+    void info() {
+        cout << cliente << " - Mesa " << mesa << " - " << data << endl;
+    }
 };
 
-// Sistema principal compacto
+// Sistema principal
 class Restaurante {
     vector<Funcionario*> funcs;
     vector<Mesa> mesas;
@@ -96,11 +104,21 @@ public:
         funcs.push_back(new Recepcionista("Dora", "R001"));
     }
 
+    ~Restaurante() {
+        for (auto f : funcs) delete f;
+        for (auto p : cardapio) delete p;
+    }
+
     void menuPrincipal() {
         int opcao;
         do {
             cout << endl << "=== RESTAURANTE ===" << endl << endl;
-            cout << "[1] Gerente" << endl << "[2] Cozinheiro" << endl << "[3] Garcom" << endl << "[4] Recepcionista" << endl << "[0] Sair" << endl << endl << "Opcao: ";
+            cout << "[1] Gerente" << endl
+                 << "[2] Cozinheiro" << endl
+                 << "[3] Garcom" << endl
+                 << "[4] Recepcionista" << endl
+                 << "[0] Sair" << endl << endl
+                 << "Opcao: ";
             cin >> opcao;
             cout << endl;
 
@@ -116,7 +134,13 @@ private:
         int opcao;
         do {
             cout << endl << "--- GERENTE ---" << endl;
-            cout << "[1] Ver Funcionarios" << endl << "[2] Ver Mesas" << endl << "[3] Cardapio" << endl << "[4] Fechar Conta" << endl << "[0] Voltar" << endl << endl << "Opcao: ";
+            cout << "[1] Ver Funcionarios" << endl 
+                 << "[2] Add Funcionario" << endl 
+                 << "[3] Ver Mesas" << endl 
+                 << "[4] Cardapio" << endl 
+                 << "[5] Fechar Conta" << endl 
+                 << "[0] Voltar" << endl << endl 
+                 << "Opcao: ";
             cin >> opcao;
             cout << endl;
 
@@ -124,20 +148,49 @@ private:
                 cout << endl << "--- FUNCIONARIOS ---" << endl;
                 for (auto f : funcs) f->info();
             }
-            else if (opcao == 2) {
+            else if (opcao == 2) adicionarFuncionario();
+            else if (opcao == 3) {
                 cout << endl << "--- MESAS ---" << endl;
                 for (auto m : mesas) m.info();
             }
-            else if (opcao == 3) menuCardapio();
-            else if (opcao == 4) fecharConta();
+            else if (opcao == 4) menuCardapio();
+            else if (opcao == 5) fecharConta();
         } while (opcao != 0);
+    }
+
+    void adicionarFuncionario() {
+        string nome, id;
+        int tipo;
+        
+        cout << "Nome: "; 
+        cin.ignore();
+        getline(cin, nome);
+        cout << "ID: "; 
+        cin >> id;
+        cout << "Tipo (1-Gerente, 2-Cozinheiro, 3-Garcom, 4-Recepcionista): "; 
+        cin >> tipo;
+        
+        if (tipo == 1) funcs.push_back(new Gerente(nome, id));
+        else if (tipo == 2) funcs.push_back(new Cozinheiro(nome, id));
+        else if (tipo == 3) funcs.push_back(new Garcom(nome, id));
+        else if (tipo == 4) funcs.push_back(new Recepcionista(nome, id));
+        else {
+            cout << "Tipo invalido!" << endl;
+            return;
+        }
+        
+        cout << "Funcionario adicionado com sucesso!" << endl;
     }
 
     void menuCozinheiro() {
         int opcao;
         do {
             cout << endl << "--- COZINHEIRO ---" << endl;
-            cout << "[1] Ver Cardapio" << endl << "[2] Add Prato" << endl << "[3] Remover Prato" << endl << "[0] Voltar" << endl << "Opcao: ";
+            cout << "[1] Ver Cardapio" << endl 
+                 << "[2] Add Prato" << endl 
+                 << "[3] Remover Prato" << endl 
+                 << "[0] Voltar" << endl << endl 
+                 << "Opcao: "; 
             cin >> opcao;
             if (opcao == 1) menuCardapio();
             else if (opcao == 2) {
@@ -165,7 +218,10 @@ private:
         int opcao;
         do {
             cout << endl << "--- GARCOM ---" << endl;
-            cout << "[1] Fazer Pedido" << endl << "[2] Fechar Conta" << endl << "[0] Voltar" << endl << endl << "Opcao: ";
+            cout << "[1] Fazer Pedido" << endl 
+                 << "[2] Fechar Conta" << endl 
+                 << "[0] Voltar" << endl << endl 
+                 << "Opcao: ";
             cin >> opcao;
             if (opcao == 1) fazerPedido();
             else if (opcao == 2) fecharConta();
@@ -176,40 +232,79 @@ private:
         int opcao;
         do {
             cout << endl << "--- RECEPCIONISTA ---" << endl;
-            cout << "[1] Ver Mesas" << endl << "[2] Fazer Reserva" << endl << "[3] Ver Reservas" << endl << "[0] Voltar" << endl << endl << "Opcao: ";
+            cout << "[1] Ver Mesas" << endl 
+                 << "[2] Fazer Reserva" << endl 
+                 << "[3] Ver Reservas" << endl 
+                 << "[4] Cancelar Reserva" << endl 
+                 << "[0] Voltar" << endl << endl
+                 << "Opcao: ";
             cin >> opcao;
-            if (opcao == 1) { for (auto m : mesas) m.info(); }
-            else if (opcao == 2) {
-                string nome, data; 
-                int mesa;
-                
-                cout << "Cliente: "; 
-                cin.ignore();
-                getline(cin, nome);
-                cout << "Mesa: ";
-                cin >> mesa;
-                cin.ignore();
-                cout << "Data (DD/MM/AAAA): ";
-                getline(cin, data);
-
-                if (mesa > 0 && mesa <= mesas.size()) {
-                    if (mesas[mesa-1].disponivel) {
-                        reservas.push_back(Reserva(nome, mesa, data));
-                        mesas[mesa-1].disponivel = false;
-                        cout << "Mesa reservada com sucesso!" << endl;
-                    } else {
-                        cout << "Mesa já está ocupada ou reservada!" << endl;
-                    }
-                } else {
-                    cout << "Número de mesa inválido!" << endl;
-                }
+            if (opcao == 1) { 
+                cout << endl << "--- MESAS ---" << endl;
+                for (auto m : mesas) m.info(); 
             }
-            else if (opcao == 3) {
-                for (int i = 0; i < reservas.size(); i++) {
-                    cout << i+1 << ". "; reservas[i].info();
-                }
-            }
+            else if (opcao == 2) fazerReserva();
+            else if (opcao == 3) verReservas();
+            else if (opcao == 4) cancelarReserva();
         } while (opcao != 0);
+    }
+
+    void fazerReserva() {
+        string nome, data; 
+        int mesa;
+        
+        cout << "Cliente: "; 
+        cin.ignore();
+        getline(cin, nome);
+        cout << "Mesa: ";
+        cin >> mesa;
+        cin.ignore();
+        cout << "Data (DD/MM/AAAA): ";
+        getline(cin, data);
+
+        if (mesa > 0 && mesa <= mesas.size()) {
+            if (mesas[mesa-1].disponivel) {
+                reservas.push_back(Reserva(nome, mesa, data));
+                mesas[mesa-1].disponivel = false;
+                cout << "Mesa reservada com sucesso!" << endl;
+            } else {
+                cout << "Mesa já está ocupada ou reservada!" << endl;
+            }
+        } else {
+            cout << "Numero de mesa invalido!" << endl;
+        }
+    }
+
+    void verReservas() {
+        if (reservas.empty()) {
+            cout << "Nenhuma reserva cadastrada!" << endl;
+            return;
+        }
+        cout << endl << "--- RESERVAS ---" << endl;
+        for (int i = 0; i < reservas.size(); i++) {
+            cout << i+1 << ". "; reservas[i].info();
+        }
+    }
+
+    void cancelarReserva() {
+        if (reservas.empty()) {
+            cout << "Nenhuma reserva cadastrada!" << endl;
+            return;
+        }
+        
+        verReservas();
+        int idx;
+        cout << endl << "Numero da reserva para cancelar: "; 
+        cin >> idx;
+        
+        if (idx > 0 && idx <= reservas.size()) {
+            int mesa = reservas[idx-1].mesa;
+            mesas[mesa-1].disponivel = true;
+            reservas.erase(reservas.begin() + idx-1);
+            cout << "Reserva cancelada! Mesa " << mesa << " liberada." << endl;
+        } else {
+            cout << "Numero invalido!" << endl;
+        }
     }
 
     void menuCardapio() {
@@ -224,7 +319,7 @@ private:
         cout << "Mesa: "; cin >> mesa;
         
         if (mesa <= 0 || mesa > mesas.size()) {
-            cout << "Número de mesa inválido!" << endl;
+            cout << "Numero de mesa invalido!" << endl;
             return;
         }
 
@@ -234,7 +329,8 @@ private:
             int opcao;
             do {
                 menuCardapio();
-                cout << "[0] Finalizar" << endl << endl << "Prato: ";
+                cout << "[0] Finalizar" << endl << endl
+                     << "Prato: ";
                 cin >> opcao;
 
                 if (opcao > 0 && opcao <= cardapio.size()) {
@@ -244,8 +340,9 @@ private:
             } while (opcao != 0);
             
             pedidos.push_back(pedido);
+            cout << "Pedido registrado para a mesa " << mesa << "!" << endl;
         } else {
-            cout << "Mesa não está ocupada ou reservada!" << endl;
+            cout << "Mesa nao esta ocupada! Faca reserva primeiro." << endl;
         }
     }
 
@@ -255,32 +352,39 @@ private:
         cin >> mesa;
         
         if (mesa <= 0 || mesa > mesas.size()) {
-            cout << "Número de mesa inválido!" << endl;
+            cout << "Numero de mesa invalido!" << endl;
             return;
         }
 
-        for (auto& pedido : pedidos) {
-            if (pedido.mesa == mesa) {
+        bool encontrou = false;
+        for (int i = 0; i < pedidos.size(); i++) {
+            if (pedidos[i].mesa == mesa) {
                 cout << endl << "====== CONTA DA MESA " << mesa << " ======" << endl << endl;
-                for (auto item : pedido.itens) item->info();
-                cout <<"---------------------" << endl << "TOTAL: R$ " << pedido.total() << endl << endl;
+                for (auto item : pedidos[i].itens) item->info();
+                cout << "---------------------" << endl << "TOTAL: R$ " << pedidos[i].total() << endl << endl;
                 
-                // Libera a mesa
+                // Liberar a mesa
                 mesas[mesa-1].disponivel = true;
                 
-                // Remove a reserva se existir
-                for (int i = 0; i < reservas.size(); i++) {
-                    if (reservas[i].mesa == mesa) {
-                        reservas.erase(reservas.begin() + i);
+                // Remover a reserva se existir
+                for (int j = 0; j < reservas.size(); j++) {
+                    if (reservas[j].mesa == mesa) {
+                        reservas.erase(reservas.begin() + j);
                         break;
                     }
                 }
                 
-                cout << "Mesa liberada!" << endl;
-                return;
+                // Remove o pedido
+                pedidos.erase(pedidos.begin() + i);
+                encontrou = true;
+                cout << "Conta fechada e mesa liberada!" << endl;
+                break;
             }
         }
-        cout << "Mesa sem pedidos!" << endl;
+        
+        if (!encontrou) {
+            cout << "Mesa sem pedidos ativos!" << endl;
+        }
     }
 };
 

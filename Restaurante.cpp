@@ -12,6 +12,9 @@ public:
     // Construtor
     Funcionario(string n, string i, string c) : nome(n), id(i), cargo(c) {}
 
+    // Destrutor virtual
+    virtual ~Funcionario() {}
+
     // Metodo virtual para exibir informacoes dos funcionarios
     virtual void info() {
         cout << nome << " (" << cargo << " - " << id  << ")" << endl;
@@ -100,16 +103,16 @@ public:
     // Construtor
     Restaurante() {
 
-        // Crias as mesas enumeradas
+        // Crias as mesas e da um numero para cada uma delas
         for (int i = 1; i <= 8; i++) mesas.push_back(Mesa(i));
 
         // Cria os pratos iniciais do cardapio
-        cardapio.push_back(new Prato("Feijoada", 35.90));
-        cardapio.push_back(new Prato("Strogonoff", 28.50));
-        cardapio.push_back(new Prato("Salada", 22.00));
+        cardapio.push_back(new Prato("Feijoada", 14.00));
+        cardapio.push_back(new Prato("Strogonoff", 15.50));
+        cardapio.push_back(new Prato("Salada", 8.00));
         cardapio.push_back(new Prato("Battom", 999.99));
 
-        // Cria os funcionarios iniciais
+        // cria os funcionarios iniciais
         funcs.push_back(new Gerente("Tio Patinhas", "G001"));
         funcs.push_back(new Cozinheiro("Creuza", "C001"));
         funcs.push_back(new Garcom("Tiringa", "W001"));
@@ -193,7 +196,7 @@ private:
         cout << "Tipo (1-Gerente, 2-Cozinheiro, 3-Garcom, 4-Recepcionista): "; 
         cin >> tipo;
         
-        // Cria o funcionario de acordo com o tipo(cargo)
+        // Cria o funcionario de acordo com o cargo
         if (tipo == 1) funcs.push_back(new Gerente(nome, id));
         else if (tipo == 2) funcs.push_back(new Cozinheiro(nome, id));
         else if (tipo == 3) funcs.push_back(new Garcom(nome, id));
@@ -231,10 +234,12 @@ private:
             else if (opcao == 3) {
                 // Remove o prato do cardapio
                 menuCardapio();
-                int idx; cout << "Numero para remover: "; cin >> idx;
-                if (idx > 0 && idx <= cardapio.size()) {
-                    delete cardapio[idx-1];
-                    cardapio.erase(cardapio.begin() + idx-1);
+                int idc;
+                cout << "Numero para remover: ";
+                cin >> idc;
+                if (idc > 0 && idc <= cardapio.size()) {
+                    delete cardapio[idc-1]; // libera a memoria
+                    cardapio.erase(cardapio.begin() + idc-1);
                     cout << "Removido!" << endl;
                 }
             }
@@ -284,12 +289,12 @@ private:
         cout << "Cliente: "; 
         cin.ignore();
         getline(cin, nome);
+        cout << "Data (DD/MM/AAAA): "; // adicionar a checagem das datas
+        cin.ignore();
+        getline(cin, data);
         cout << "Mesa: ";
         cin >> mesa;
-        cin.ignore();
-        cout << "Data (DD/MM/AAAA): ";
-        getline(cin, data);
-
+        
         // Verifica se a mesa esta disponivel
         if (mesa > 0 && mesa <= mesas.size()) {
             if (mesas[mesa-1].disponivel) {
@@ -306,11 +311,13 @@ private:
 
     // Lista as reservas feitas
     void verReservas() {
+        cout << endl << "--- RESERVAS ---" << endl;
+
         if (reservas.empty()) {
             cout << "Nenhuma reserva cadastrada!" << endl;
             return;
         }
-        cout << endl << "--- RESERVAS ---" << endl;
+        // lista as reservas
         for (int i = 0; i < reservas.size(); i++) {
             cout << i+1 << ". "; reservas[i].info();
         }
@@ -323,14 +330,14 @@ private:
         }
         
         verReservas();
-        int idx;
+        int idr;
         cout << endl << "Numero da reserva para cancelar: "; 
-        cin >> idx;
+        cin >> idr;
         
-        if (idx > 0 && idx <= reservas.size()) {
-            int mesa = reservas[idx-1].mesa;
+        if (idr > 0 && idr <= reservas.size()) {
+            int mesa = reservas[idr-1].mesa;
             mesas[mesa-1].disponivel = true;
-            reservas.erase(reservas.begin() + idx-1);
+            reservas.erase(reservas.begin() + idr-1);
             cout << "Reserva cancelada! Mesa " << mesa << " liberada." << endl;
         } else {
             cout << "Numero invalido!" << endl;
@@ -395,9 +402,11 @@ private:
             if (pedidos[i].mesa == mesa) {
                 cout << endl << "====== CONTA DA MESA " << mesa << " ======" << endl << endl;
                 for (auto item : pedidos[i].itens) item->info();
-                cout << "---------------------" << endl << "TOTAL: R$ " << pedidos[i].total() << endl << endl;
-                
-                // Libera a mesa
+
+                cout << "---------------------" << endl
+                     << "TOTAL: R$ " << pedidos[i].total() << endl << endl;
+
+                // libera a mesa
                 mesas[mesa-1].disponivel = true;
                 
                 // Remove a reserva se existir
@@ -424,8 +433,9 @@ private:
 
 // Main
 int main() {
-    // Cria o sistema do restaurante e inicia o menu principal
+    // Cria o sistema do restaurante
     Restaurante r;
+    // Inicia o menu principal
     r.menuPrincipal();
     return 0;
 }
